@@ -55,7 +55,7 @@ public class Main extends SimpleApplication implements AnalogListener, ActionLis
         bulletAppState = new BulletAppState();
         stateManager.attach(bulletAppState);
         bulletAppState.getPhysicsSpace().setGravity(new Vector3f(0, -9.8f, 0));
-//        bulletAppState.setDebugEnabled(true);
+        bulletAppState.setDebugEnabled(true);
         mapLoader = new MapLoader(rootNode, assetManager, viewPort, bulletAppState);
         mapLoader.initMap();
         flyCam.setEnabled(false);
