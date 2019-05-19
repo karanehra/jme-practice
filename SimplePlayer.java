@@ -67,7 +67,7 @@ public class SimplePlayer {
         vehicle.setSuspensionDamping(dampValue * 2.0f * FastMath.sqrt(stiffness));
         vehicle.setSuspensionStiffness(stiffness);
         vehicle.setMaxSuspensionForce(10000.0f);
-//        vehicle.setSpatial(chasis);
+
 
         Vector3f wheelDirection = new Vector3f(0, -1, 0);
         Vector3f wheelAxle = new Vector3f(0, 0, -1);
@@ -121,17 +121,6 @@ public class SimplePlayer {
         vehicleNode.setLocalTranslation(new Vector3f(10, 15, 10));
 
         bulletAppState.getPhysicsSpace().add(vehicle);
-
-//        Box box2 = new Box(100, 2, 100);
-//        Geometry geom = new Geometry("floor", box2);
-//        geom.setMaterial(mat2);
-//        geom.setLocalTranslation(new Vector3f(0, -10, 0));
-//        RigidBodyControl rgc = new RigidBodyControl(0f);
-//        geom.addControl(rgc);
-//        rgc.getCollisionShape().setMargin(0.5f);
-//        bulletAppState.getPhysicsSpace().add(geom);
-//        rootNode.attachChild(geom);
-
     }
 
     public Node getGeo() {

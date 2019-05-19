@@ -32,33 +32,23 @@ import java.util.Arrays;
  */
 public class MapLoader {
 
-    private String directory = System.getProperty("user.home") + File.separator + "sample.txt";
+    private final String directory = System.getProperty("user.home") + File.separator + "sample.txt";
 
     private static Node rootNode;
     private static AssetManager assetManager;
     private static ViewPort viewPort;
-    private int map_size = 64;
-    private float SCALE_FACTOR = 5f;
+    private final int map_size = 64;
+    private final float SCALE_FACTOR = 5f;
 
-    public Geometry player;
 
     private ArrayList<String[]> map_array = new ArrayList<String[]>();
-    private ArrayList<Integer[]> render_state = new ArrayList<Integer[]>();
     private ArrayList<Block> block_state = new ArrayList<Block>();
     private ArrayList<String> ids_state = new ArrayList<String>();
 
-    private Spatial house;
-    private Spatial road;
-    private Spatial ground;
-    private Spatial turn;
-    private Spatial grass;
-    private Spatial intersection;
-    private Spatial trisection;
-    private Spatial billboard;
     private static BulletAppState bulletAppState;
 
     private Vector3f player_pos_tracker = new Vector3f();
-    private final ModelLoader modelLoader;
+    private ModelLoader modelLoader;
 
     /**
      * Used to initialize the mapLoader. The params needed to prevent an
@@ -76,23 +66,17 @@ public class MapLoader {
         assetManager = am;
         viewPort = vp;
         bulletAppState = ba;
-        modelLoader = new ModelLoader(assetManager, bulletAppState, rootNode);
-        modelLoader.loadAssets();
-
     }
 
     /**
-     *
+     * Initializes the player position and the model loades.
+     * @param player_pos the player position
      */
     public void initMap(Vector3f player_pos) {
 
         player_pos_tracker = player_pos;
-
-        int x_lower = Integer.max((int) player_pos_tracker.x - 3, 0);
-        int x_upper = Integer.min((int) player_pos_tracker.x + 3, 8);
-
-        int z_lower = Integer.max((int) player_pos_tracker.z - 3, 0);
-        int z_upper = Integer.min((int) player_pos_tracker.z + 3, 64);
+        modelLoader = new ModelLoader(assetManager, bulletAppState, rootNode);
+        modelLoader.loadAssets();
 
         try (BufferedReader fileReader = new BufferedReader(new FileReader(directory))) {
             String line = fileReader.readLine();
@@ -100,7 +84,6 @@ public class MapLoader {
                 map_array.add(line.split(""));
                 Integer[] temp = new Integer[64];
                 Arrays.fill(temp, 0);
-                render_state.add(temp);
                 line = fileReader.readLine();
             }
         } catch (FileNotFoundException e) {
@@ -112,7 +95,13 @@ public class MapLoader {
         createLightsAndShadows();
 
     }
-
+    
+    /**
+     * The render function called per frame. 
+     * Used to load/unload blocks from the scene as per player position.
+     * @param player_pos the player position
+     * @see neeeds optimization
+     */
     public void renderMap(Vector3f player_pos) {
         if (ids_state.isEmpty()) {
             player_pos_tracker = player_pos;
@@ -148,7 +137,7 @@ public class MapLoader {
                 int z_lower = Integer.max((int) player_pos.z - 3, 0);
                 int z_upper = Integer.min((int) player_pos.z + 3, 64);
 
-                ArrayList<String> new_ids = new ArrayList<String>();
+                ArrayList<String> new_ids = new ArrayList<>();
 
                 for (int i = x_lower; i < x_upper; i++) {
                     for (int j = z_lower; j < z_upper; j++) {
@@ -190,78 +179,9 @@ public class MapLoader {
         }
     }
 
-    public void renderMapnew(Vector3f player_pos) {
-        if (!player_pos_tracker.equals(player_pos)) {
-            player_pos_tracker = player_pos;
-            int x_lower = Integer.max((int) player_pos.x - 3, 0);
-            int x_upper = Integer.min((int) player_pos.x + 3, 8);
-
-            int z_lower = Integer.max((int) player_pos.z - 3, 0);
-            int z_upper = Integer.min((int) player_pos.z + 3, 64);
-
-            ArrayList<String> new_ids = new ArrayList<String>();
-
-            for (int i = x_lower; i < x_upper; i++) {
-                for (int j = z_lower; j < z_upper; j++) {
-                    String id = Integer.toString(i) + Integer.toString(j);
-                    new_ids.add(id);
-                }
-            }
-
-            if (ids_state.size() > 0) {
-                for (int c = 0; c < ids_state.size(); c++) {
-                    String element = ids_state.get(c);
-                    if (new_ids.contains(element)) {
-
-                    } else {
-
-                    }
-                }
-            }
-
-//            for (int i = x_lower; i < x_upper; i++) {
-//                for (int j = y_lower; j < y_upper; j++) {
-//                    Block tempBlock = new Block();
-//                    String tempId;
-//                    if ("0".equals(map_array.get(i)[j])) {
-//                        if (render_state.get(i)[j] == 0) {
-//                            tempBlock = modelLoader.createGrass(i, j);
-//                            render_state.get(i)[j] = 1;
-//                        }
-//                    } else if ("1".equals(map_array.get(i)[j])) {
-//                        if (render_state.get(i)[j] == 0) {
-//                            tempBlock = modelLoader.getIntersectionType(i, j, map_array);
-//                            render_state.get(i)[j] = 1;
-//                        }
-//                    } else if ("2".equals(map_array.get(i)[j])) {
-//                        if (render_state.get(i)[j] == 0) {
-//                            tempBlock = modelLoader.createHouse(i, j);
-//                            render_state.get(i)[j] = 1;
-//                        }
-//
-//                    } else if ("b".equals(map_array.get(i)[j])) {
-//                        if (render_state.get(i)[j] == 0) {
-//                            tempBlock = modelLoader.createBillboard(i, j);
-//                            render_state.get(i)[j] = 1;
-//                        }
-//
-//                    }
-//                    tempId = tempBlock.getId();
-//                    if (!ids_state.contains(tempId)) {
-//                        ids_state.add(tempId);
-//                        block_state.add(tempBlock);
-////                        bulletAppState.getPhysicsSpace().add(tempBlock.getRBC());
-////                        rootNode.attachChild(tempBlock.getSpatial());
-//                    } else {
-//                        Block temp = block_state.get(ids_state.indexOf(tempId));
-////                        temp.detach();
-//                    }
-//                }
-//            }
-        }
-
-    }
-
+    /**
+     * Lights up the scene.
+     */
     private void createLightsAndShadows() {
 
         DirectionalLight sun = new DirectionalLight();
