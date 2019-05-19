@@ -35,6 +35,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Dictionary;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /**
@@ -55,6 +59,9 @@ public class MapLoader {
 
     private ArrayList<String[]> map_array = new ArrayList<String[]>();
     private ArrayList<Integer[]> render_state = new ArrayList<Integer[]>();
+    private ArrayList<Block> block_state = new ArrayList<Block>();
+    private ArrayList<String> ids_state = new ArrayList<String>();
+    
 
     private Spatial house;
     private Spatial road;
@@ -71,12 +78,13 @@ public class MapLoader {
     /**
      * Used to initialize the mapLoader. The params needed to prevent an
      * unnecessary extension from the SimpleGame class
+     *
      * @param rn the root node
      * @param am the asset manager
      * @param vp the viewport
      * @param ba the bulletApp
-     * 
-     * 
+     *
+     *
      */
     public MapLoader(Node rn, AssetManager am, ViewPort vp, BulletAppState ba) {
         rootNode = rn;
@@ -87,6 +95,10 @@ public class MapLoader {
 
     }
 
+    /**
+     * Used to load all assets ONCE on game start.
+     *
+     */
     private void loadAssets() {
         house = assetManager.loadModel("Models/h2/h2.j3o");
         grass = assetManager.loadModel("Models/ground/ground.j3o");
@@ -97,6 +109,9 @@ public class MapLoader {
         billboard = assetManager.loadModel("Models/billboard/billboard.j3o");
     }
 
+    /**
+     *
+     */
     public void initMap() {
 
         try (BufferedReader fileReader = new BufferedReader(new FileReader(directory))) {
@@ -129,14 +144,16 @@ public class MapLoader {
 
             for (int i = x_lower; i < x_upper; i++) {
                 for (int j = y_lower; j < y_upper; j++) {
+                    Block tempBlock = new Block();
+                    String tempId;
                     if ("0".equals(map_array.get(i)[j])) {
                         if (render_state.get(i)[j] == 0) {
-                            createGrass(i, j);
+                            tempBlock = createGrass(i, j);
                             render_state.get(i)[j] = 1;
                         }
                     } else if ("1".equals(map_array.get(i)[j])) {
                         if (render_state.get(i)[j] == 0) {
-                            getIntersectionType(i, j, map_array);
+                            tempBlock = getIntersectionType(i, j, map_array);
                             render_state.get(i)[j] = 1;
                         }
                     } else if ("2".equals(map_array.get(i)[j])) {
@@ -151,6 +168,16 @@ public class MapLoader {
                             render_state.get(i)[j] = 1;
                         }
 
+                    }
+                    tempId = tempBlock.getId();
+                    if(!ids_state.contains(tempId)){
+                        ids_state.add(tempId);
+                        block_state.add(tempBlock);
+//                        bulletAppState.getPhysicsSpace().add(tempBlock.getRBC());
+//                        rootNode.attachChild(tempBlock.getSpatial());
+                    } else {
+                        Block temp = block_state.get(ids_state.indexOf(tempId));
+//                        temp.detach();
                     }
                 }
             }
@@ -179,94 +206,89 @@ public class MapLoader {
 
     }
 
-    private void createHouse(int i, int j) {
+    private Block createHouse(int i, int j) {
         Spatial x = house.clone();
         Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0.5f, j));
-        bulletAppState.getPhysicsSpace().add(blc.getSpatial());
-        rootNode.attachChild(blc.getSpatial());
+        return blc;
     }
 
-    private void createStraight1xRoad(int i, int j, boolean rotate) {
+    private Block createStraight1xRoad(int i, int j, boolean rotate) {
         Spatial x = road.clone();
         if (rotate) {
-            x.rotate(0,FastMath.HALF_PI,0);
+            x.rotate(0, FastMath.HALF_PI, 0);
         }
         Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0, j));
-        bulletAppState.getPhysicsSpace().add(blc.getSpatial());
-        rootNode.attachChild(blc.getSpatial());
+        return blc;
     }
 
-    private void createTurn1xRoad(int i, int j, int rotate_count) {
+    private Block createTurn1xRoad(int i, int j, int rotate_count) {
         Spatial x = turn.clone();
-        x.rotate(0,rotate_count * FastMath.HALF_PI,0);
+        x.rotate(0, rotate_count * FastMath.HALF_PI, 0);
         Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0, j));
-        bulletAppState.getPhysicsSpace().add(blc.getSpatial());
-        rootNode.attachChild(blc.getSpatial());
+        return blc;
     }
 
-    private void createGrass(int i, int j) {
+    private Block createGrass(int i, int j) {
         Spatial x = grass.clone();
         Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0.05f, j));
-        bulletAppState.getPhysicsSpace().add(blc.getSpatial());
-        rootNode.attachChild(blc.getSpatial());
+        return blc;
 
     }
-    
-    private void createIntersection(int i, int j) {
+
+    private Block createIntersection(int i, int j) {
         Spatial x = intersection.clone();
         Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0, j));
-        bulletAppState.getPhysicsSpace().add(blc.getSpatial());
-        rootNode.attachChild(blc.getSpatial());
+        return blc;
     }
 
-    private void createTrisection1xRoad(int i, int j, int rotation_count) {
+    private Block createTrisection1xRoad(int i, int j, int rotation_count) {
         Spatial x = trisection.clone();
-        x.rotate(0,FastMath.HALF_PI * rotation_count,0);
+        x.rotate(0, FastMath.HALF_PI * rotation_count, 0);
         Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0, j));
-        bulletAppState.getPhysicsSpace().add(blc.getSpatial());
-        rootNode.attachChild(blc.getSpatial());
+        return blc;
     }
 
-    private void createBillboard(int i, int j) {
+    private Block createBillboard(int i, int j) {
         Spatial x = billboard.clone();
         Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0, j));
-        bulletAppState.getPhysicsSpace().add(blc.getSpatial());
-        rootNode.attachChild(blc.getSpatial());
+        return blc;
     }
 
-    public void getIntersectionType(int i, int j, ArrayList<String[]> map) {
+    public Block getIntersectionType(int i, int j, ArrayList<String[]> map) {
         String neighbour_code = map.get(i - 1)[j] + map.get(i)[j + 1] + map.get(i + 1)[j] + map.get(i)[j - 1];
-
+        Block tempBlock;
         if (Pattern.matches("[^1]111$", neighbour_code)) {
-            createTrisection1xRoad(i, j, 1);
+            tempBlock = createTrisection1xRoad(i, j, 1);
         } else if (Pattern.matches("^1[^1]11$", neighbour_code)) {
-            createTrisection1xRoad(i, j, 2);
+            tempBlock = createTrisection1xRoad(i, j, 2);
         } else if (Pattern.matches("^11[^1]1$", neighbour_code)) {
-            createTrisection1xRoad(i, j, 3);
+            tempBlock = createTrisection1xRoad(i, j, 3);
         } else if (Pattern.matches("^111[^1]$", neighbour_code)) {
-            createTrisection1xRoad(i, j, 0);
+            tempBlock = createTrisection1xRoad(i, j, 0);
         } else if (Pattern.matches("^11[^1]*$", neighbour_code)) {
-            createTurn1xRoad(i, j, 0);
+            tempBlock = createTurn1xRoad(i, j, 0);
         } else if (Pattern.matches("^[^1]11[^1]$", neighbour_code)) {
-            createTurn1xRoad(i, j, 1);
+            tempBlock = createTurn1xRoad(i, j, 1);
         } else if (Pattern.matches("^[^1]*11$", neighbour_code)) {
-            createTurn1xRoad(i, j, 2);
+            tempBlock = createTurn1xRoad(i, j, 2);
         } else if (Pattern.matches("^1[^1]*1$", neighbour_code)) {
-            createTurn1xRoad(i, j, 3);
+            tempBlock = createTurn1xRoad(i, j, 3);
         } else if (Pattern.matches("^1[^1]1[^1]$", neighbour_code)) {
-            createStraight1xRoad(i, j, false);
+            tempBlock = createStraight1xRoad(i, j, false);
         } else if (Pattern.matches("^[^1]1[^1]1$", neighbour_code)) {
-            createStraight1xRoad(i, j, true);
+            tempBlock = createStraight1xRoad(i, j, true);
         } else if (Pattern.matches("^1[^1]*$", neighbour_code)) {
-            createStraight1xRoad(i, j, false);
+            tempBlock = createStraight1xRoad(i, j, false);
         } else if (Pattern.matches("^[^1]1[^1]*$", neighbour_code)) {
-            createStraight1xRoad(i, j, false);
+            tempBlock = createStraight1xRoad(i, j, false);
         } else if (Pattern.matches("^[^1]*1[^1]$", neighbour_code)) {
-            createStraight1xRoad(i, j, true);
+            tempBlock = createStraight1xRoad(i, j, true);
         } else if (Pattern.matches("^[^1]*1$", neighbour_code)) {
-            createStraight1xRoad(i, j, true);
+            tempBlock = createStraight1xRoad(i, j, true);
         } else {
-            createIntersection(i, j);
+            tempBlock = createIntersection(i, j);
         }
+        
+        return tempBlock;
     }
 }

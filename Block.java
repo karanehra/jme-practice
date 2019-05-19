@@ -24,18 +24,27 @@ public class Block {
     private Float SCALE_FACTOR = 5f;
     private Spatial block_spatial;
     private Vector3f block_location = new Vector3f();
+    public String block_id;
+    public Node rootNode;
+    RigidBodyControl control = new RigidBodyControl(0);
+    public Block(){
+        
+    }
     
     public Block(Spatial sp,BulletAppState bas, Node rn, Vector3f pos){
         block_spatial = sp;
         block_location = pos;
         translateBlock();
+        rootNode = rn;
+        block_id = Float.toString(pos.x) + Float.toString(pos.z);
         block_spatial.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
         block_spatial.scale(SCALE_FACTOR);
-        RigidBodyControl control = new RigidBodyControl(0);
         block_spatial.addControl(control);
         control.getCollisionShape().setMargin(0.4f);
         control.setRestitution(0.1f);
         control.setFriction(0.4f);
+        bas.getPhysicsSpace().add(block_spatial);
+        rn.attachChild(block_spatial);
     }   
     
     private void translateBlock(){
@@ -48,4 +57,17 @@ public class Block {
     public void rotateAlongVertical(Float angle){
         block_spatial.rotate(0f, angle, 0f);
     }
-}
+    
+    public String getId(){
+        return block_id;
+    }
+    
+    public RigidBodyControl getRBC(){
+        return control;
+    }
+    
+    public void detach(){
+        rootNode.detachChild(block_spatial);
+    }
+}   
+
