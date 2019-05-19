@@ -5,11 +5,8 @@
  */
 package mygame;
 
-import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Node;
@@ -50,7 +47,7 @@ public class Block {
     }   
     
     private void translateBlock(){
-        block_spatial.setLocalTranslation(block_location.x* SCALE_FACTOR, block_location.y * SCALE_FACTOR - 5, block_location.z * SCALE_FACTOR);
+        block_spatial.setLocalTranslation(block_location.x* SCALE_FACTOR - 4, block_location.y * SCALE_FACTOR - 5, block_location.z * SCALE_FACTOR);
     }
     public Spatial getSpatial(){
         return block_spatial;

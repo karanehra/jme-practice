@@ -7,16 +7,12 @@ package mygame;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.collision.shapes.BoxCollisionShape;
 import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.collision.shapes.CompoundCollisionShape;
-import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.control.VehicleControl;
 import com.jme3.bullet.util.CollisionShapeFactory;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -36,7 +32,7 @@ public class SimplePlayer {
     private VehicleControl vehicle;
 
     private float SCALE_FACTOR = 0.8f;
-    private float chassis_x = 0.6f*SCALE_FACTOR, chassis_y = 0.2f*SCALE_FACTOR, chassis_z = 1.2f*SCALE_FACTOR;
+    private float chassis_x = 1.2f*SCALE_FACTOR, chassis_y = 0.2f*SCALE_FACTOR, chassis_z = 0.6f*SCALE_FACTOR ;
 
     public SimplePlayer(AssetManager am, Node rn, BulletAppState ba) {
         assetManager = am;
@@ -74,7 +70,7 @@ public class SimplePlayer {
 //        vehicle.setSpatial(chasis);
 
         Vector3f wheelDirection = new Vector3f(0, -1, 0);
-        Vector3f wheelAxle = new Vector3f(-1, 0, 0);
+        Vector3f wheelAxle = new Vector3f(0, 0, -1);
         float radius = 0.5f *SCALE_FACTOR;
         float restLength = 0.2f *SCALE_FACTOR;
         float yOff = -0.4f*SCALE_FACTOR;
@@ -97,7 +93,7 @@ public class SimplePlayer {
         wheels2.rotate(0, FastMath.HALF_PI, 0);
         wheels2.setMaterial(mat);
         vehicle.addWheel(node2, new Vector3f(xOff, yOff, zOff),
-                wheelDirection, wheelAxle, restLength, radius, true);
+                wheelDirection, wheelAxle, restLength, radius, false);
 
         Node node3 = new Node("wheel 3 node");
         Geometry wheels3 = new Geometry("wheel 3", wheelMesh);
@@ -105,7 +101,7 @@ public class SimplePlayer {
         wheels3.rotate(0, FastMath.HALF_PI, 0);
         wheels3.setMaterial(mat);
         vehicle.addWheel(node3, new Vector3f(-xOff, yOff, -zOff),
-                wheelDirection, wheelAxle, restLength, radius, false);
+                wheelDirection, wheelAxle, restLength, radius, true);
 
         Node node4 = new Node("wheel 4 node");
         Geometry wheels4 = new Geometry("wheel 4", wheelMesh);
