@@ -27,6 +27,10 @@ import com.jme3.shadow.DirectionalLightShadowRenderer;
 /**
  * This is the Main Class of your Game. You should only do initialization here.
  * Move your Logic into AppStates or Controls
+ * 
+ * PLEASE READ THIS 
+ * 
+ * X, Z ARE HORIZONTAL COORDINATES. Y IS THE VERTICAL COORDINATE
  *
  * @author karanehra
  */
@@ -46,6 +50,8 @@ public class Main extends SimpleApplication implements AnalogListener, ActionLis
     private final float brakeForce = 100.0f;
     private float accelerationValue = 0;
 
+    public Vector3f player_position = new Vector3f();
+
     public PhysicsSpace getPhysicsSpace() {
         return bulletAppState.getPhysicsSpace();
     }
@@ -57,10 +63,11 @@ public class Main extends SimpleApplication implements AnalogListener, ActionLis
         bulletAppState.getPhysicsSpace().setGravity(new Vector3f(0, -9.8f, 0));
         bulletAppState.setDebugEnabled(true);
         mapLoader = new MapLoader(rootNode, assetManager, viewPort, bulletAppState);
-        mapLoader.initMap();
+        player = new SimplePlayer(assetManager, rootNode, bulletAppState);
+        player_position = player.getGeo().getLocalTranslation();
+        mapLoader.initMap(player_position);
         flyCam.setEnabled(false);
 
-        player = new SimplePlayer(assetManager, rootNode, bulletAppState);
         
 
         ChaseCamera chaseCam = new ChaseCamera(cam, player.getGeo(), inputManager);
@@ -71,8 +78,14 @@ public class Main extends SimpleApplication implements AnalogListener, ActionLis
 
     @Override
     public void simpleUpdate(float tpf) {
-        Vector3f coords = player.getGeo().getLocalTranslation();
-        mapLoader.renderMap(new Vector3f(FastMath.floor(coords.x)/5,FastMath.floor(coords.y)/5,FastMath.floor(coords.z)/5));
+        player_position = player.getGeo().getLocalTranslation();
+        mapLoader.renderMap(
+                new Vector3f(
+                        FastMath.floor(player_position.x) / 5,
+                        FastMath.floor(player_position.y) / 5,
+                        FastMath.floor(player_position.z) / 5
+                )
+        );
     }
 
     @Override
@@ -86,7 +99,7 @@ public class Main extends SimpleApplication implements AnalogListener, ActionLis
         inputManager.addMapping("moveRight", new KeyTrigger(keyInput.KEY_RIGHT), new KeyTrigger(keyInput.KEY_D));
         inputManager.addMapping("moveLeft", new KeyTrigger(keyInput.KEY_LEFT), new KeyTrigger(keyInput.KEY_A));
         inputManager.addMapping("jump", new KeyTrigger(keyInput.KEY_P));
-        inputManager.addListener(this, "moveForward", "moveBackward", "moveRight", "moveLeft","jump");
+        inputManager.addListener(this, "moveForward", "moveBackward", "moveRight", "moveLeft", "jump");
     }
 
     @Override
@@ -117,7 +130,7 @@ public class Main extends SimpleApplication implements AnalogListener, ActionLis
                 accelerationValue -= accelerationForce;
             }
             player.getVehicle().accelerate(accelerationValue);
-        } else if (name.equals("moveBackward")){
+        } else if (name.equals("moveBackward")) {
             if (keyPressed) {
                 player.getVehicle().brake(brakeForce);
             } else {

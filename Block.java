@@ -27,6 +27,7 @@ public class Block {
     public String block_id;
     public Node rootNode;
     RigidBodyControl control = new RigidBodyControl(0);
+    private BulletAppState bulletAppState;
     public Block(){
         
     }
@@ -35,15 +36,16 @@ public class Block {
         block_spatial = sp;
         block_location = pos;
         translateBlock();
+        bulletAppState = bas;
         rootNode = rn;
-        block_id = Float.toString(pos.x) + Float.toString(pos.z);
+        block_id = Float.toString(pos.x) + "-" + Float.toString(pos.z);
         block_spatial.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
         block_spatial.scale(SCALE_FACTOR);
         block_spatial.addControl(control);
         control.getCollisionShape().setMargin(0.4f);
         control.setRestitution(0.1f);
         control.setFriction(0.4f);
-        bas.getPhysicsSpace().add(block_spatial);
+        bulletAppState.getPhysicsSpace().add(block_spatial);
         rn.attachChild(block_spatial);
     }   
     
@@ -67,6 +69,7 @@ public class Block {
     }
     
     public void detach(){
+        bulletAppState.getPhysicsSpace().remove(block_spatial);
         rootNode.detachChild(block_spatial);
     }
 }   
