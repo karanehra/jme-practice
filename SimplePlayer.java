@@ -25,14 +25,17 @@ import com.jme3.scene.shape.Cylinder;
  */
 public class SimplePlayer {
 
-    private AssetManager assetManager;
-    private Node rootNode;
-    private BulletAppState bulletAppState;
+    private final AssetManager assetManager;
+    private final Node rootNode;
+    private final BulletAppState bulletAppState;
     private Node geo_cam;
     private VehicleControl vehicle;
 
-    private float SCALE_FACTOR = 0.8f;
-    private float chassis_x = 1.2f*SCALE_FACTOR, chassis_y = 0.2f*SCALE_FACTOR, chassis_z = 0.6f*SCALE_FACTOR ;
+    private final float SCALE_FACTOR = 0.8f;
+    private final float chassis_x = 1.2f * SCALE_FACTOR, chassis_y = 0.2f * SCALE_FACTOR, chassis_z = 0.4f * SCALE_FACTOR;
+    private Material mat;
+    private Material mat2;
+    private Node vehicleNode;
 
     public SimplePlayer(AssetManager am, Node rn, BulletAppState ba) {
         assetManager = am;
@@ -42,18 +45,14 @@ public class SimplePlayer {
     }
 
     private void initPlayer() {
-        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setColor("Color", ColorRGBA.Red);
 
-        Material mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-        mat2.setColor("Color", ColorRGBA.Gray);
-        
-        Box box = new Box(chassis_x,chassis_y,chassis_z);
+        createMaterials();
+        Box box = new Box(chassis_x, chassis_y, chassis_z);
         Geometry chasis = new Geometry("box", box);
         chasis.setMaterial(mat2);
         CollisionShape carHull = CollisionShapeFactory.createDynamicMeshShape(chasis);
 
-        Node vehicleNode = new Node("vehicleNode");
+        vehicleNode = new Node("vehicleNode");
         vehicleNode.attachChild(chasis);
         geo_cam = vehicleNode;
 
@@ -67,16 +66,35 @@ public class SimplePlayer {
         vehicle.setSuspensionDamping(dampValue * 2.0f * FastMath.sqrt(stiffness));
         vehicle.setSuspensionStiffness(stiffness);
         vehicle.setMaxSuspensionForce(10000.0f);
+        createWheels();
 
+        rootNode.attachChild(vehicleNode);
+        vehicle.setCcdMotionThreshold(1e-6f);
+
+        bulletAppState.getPhysicsSpace().add(vehicle);
+    }
+
+    public Node getGeo() {
+        return geo_cam;
+    }
+
+    public VehicleControl getVehicle() {
+        return vehicle;
+    }
+
+    public void jump() {
+        vehicle.applyImpulse(new Vector3f(0f, 100f, 0), Vector3f.ZERO);
+    }
+
+    private void createWheels() {
 
         Vector3f wheelDirection = new Vector3f(0, -1, 0);
         Vector3f wheelAxle = new Vector3f(0, 0, -1);
-        float radius = 0.5f *SCALE_FACTOR;
-        float restLength = 0.2f *SCALE_FACTOR;
-        float yOff = -0.4f*SCALE_FACTOR;
-        float xOff = 1f*SCALE_FACTOR;
-        float zOff = 1f*SCALE_FACTOR;
-
+        float radius = 0.4f * SCALE_FACTOR;
+        float restLength = 0.1f * SCALE_FACTOR;
+        float yOff = -0.1f * SCALE_FACTOR;
+        float xOff = 1f * SCALE_FACTOR;
+        float zOff = 0.7f * SCALE_FACTOR;
         Cylinder wheelMesh = new Cylinder(16, 16, radius, radius * 0.6f, true);
 
         Node node1 = new Node("wheel 1 node");
@@ -115,24 +133,14 @@ public class SimplePlayer {
         vehicleNode.attachChild(node2);
         vehicleNode.attachChild(node3);
         vehicleNode.attachChild(node4);
-
-        vehicleNode.rotate(0, FastMath.PI / 2, 0);
-        rootNode.attachChild(vehicleNode);
-        vehicleNode.setLocalTranslation(new Vector3f(10, 15, 10));
-
-        bulletAppState.getPhysicsSpace().add(vehicle);
     }
 
-    public Node getGeo() {
-        return geo_cam;
-    }
+    private void createMaterials() {
+        mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", ColorRGBA.Red);
 
-    public VehicleControl getVehicle() {
-        return vehicle;
-    }
-    
-    public void jump(){
-        vehicle.applyImpulse(new Vector3f(0f,100f,0), Vector3f.ZERO);
+        mat2 = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
+        mat2.setColor("Color", ColorRGBA.Gray);
     }
 
 }

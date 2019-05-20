@@ -19,7 +19,7 @@ import com.jme3.scene.Spatial;
  */
 public class Block {
 
-    private final Float SCALE_FACTOR = 6f;
+    private final Float SCALE_FACTOR = 5f;
     private Spatial block_spatial;
     private Vector3f block_location = new Vector3f();
     public String block_id;
@@ -58,7 +58,7 @@ public class Block {
                 block_location.z * SCALE_FACTOR
         );
     }
-
+    
     public Spatial getSpatial() {
         return block_spatial;
     }

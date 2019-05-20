@@ -39,7 +39,7 @@ public class ModelLoader {
     
     /**
      * Used to load all assets ONCE on game start.
-     *
+     *  These assets are the cloned whenever needed by the block creators.
      */
     public void loadAssets() {
         house = assetManager.loadModel("Models/h2/h2.j3o");

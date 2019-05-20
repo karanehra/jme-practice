@@ -23,9 +23,10 @@ import com.jme3.scene.control.CameraControl;
  * @author karanehra
  */
 public class Main extends SimpleApplication implements AnalogListener, ActionListener {
-
+    private static Main app;
+    
     public static void main(String[] args) {
-        Main app = new Main();
+        Main.app = new Main();
         app.start();
     }
 
@@ -46,7 +47,7 @@ public class Main extends SimpleApplication implements AnalogListener, ActionLis
         stateManager.attach(bulletAppState);
 
         bulletAppState.getPhysicsSpace().setGravity(new Vector3f(0, -9.8f, 0));
-        bulletAppState.setDebugEnabled(true);
+//        bulletAppState.setDebugEnabled(true);
 
         mapLoader = new MapLoader(rootNode, assetManager, viewPort, bulletAppState);
 
@@ -131,7 +132,6 @@ public class Main extends SimpleApplication implements AnalogListener, ActionLis
                 player.getVehicle().brake(0f);
             }
         } else if (name.equals("jump")) {
-            player.jump();
         }
     }
 }

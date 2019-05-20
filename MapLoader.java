@@ -106,7 +106,7 @@ public class MapLoader {
         if (ids_state.isEmpty()) {
             player_pos_tracker = player_pos;
             int x_lower = Integer.max((int) player_pos.x - 3, 0);
-            int x_upper = Integer.min((int) player_pos.x + 3, 8);
+            int x_upper = Integer.min((int) player_pos.x + 3, 64);
 
             int z_lower = Integer.max((int) player_pos.z - 3, 0);
             int z_upper = Integer.min((int) player_pos.z + 3, 64);
@@ -132,7 +132,7 @@ public class MapLoader {
             if (!player_pos_tracker.equals(player_pos)) {
                 player_pos_tracker = player_pos;
                 int x_lower = Integer.max((int) player_pos.x - 3, 0);
-                int x_upper = Integer.min((int) player_pos.x + 3, 8);
+                int x_upper = Integer.min((int) player_pos.x + 3, 64);
 
                 int z_lower = Integer.max((int) player_pos.z - 3, 0);
                 int z_upper = Integer.min((int) player_pos.z + 3, 64);
@@ -185,7 +185,7 @@ public class MapLoader {
     private void createLightsAndShadows() {
 
         DirectionalLight sun = new DirectionalLight();
-        sun.setColor(ColorRGBA.White);
+        sun.setColor(ColorRGBA.White.mult(2f));
         sun.setDirection(new Vector3f(10, -10, -10).normalizeLocal());
         rootNode.addLight(sun);
 
