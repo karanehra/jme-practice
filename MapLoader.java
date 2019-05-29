@@ -40,7 +40,6 @@ public class MapLoader {
     private final int map_size = 64;
     private final float SCALE_FACTOR = 5f;
 
-
     private ArrayList<String[]> map_array = new ArrayList<String[]>();
     private ArrayList<Block> block_state = new ArrayList<Block>();
     private ArrayList<String> ids_state = new ArrayList<String>();
@@ -62,16 +61,18 @@ public class MapLoader {
         viewPort = gm.getViewPort();
         bulletAppState = gm.getBulletAppState();
         modelLoader = new ModelLoader(gm);
+        gm.setModelLoader(modelLoader);
     }
 
     /**
      * Initializes the player position and the model loades.
+     *
      * @param player_pos the player position
      */
     public void initMap(Vector3f player_pos) {
 
         player_pos_tracker = player_pos;
-        
+
         modelLoader.loadAssets();
 
         try (BufferedReader fileReader = new BufferedReader(new FileReader(directory))) {
@@ -91,10 +92,11 @@ public class MapLoader {
         createLightsAndShadows();
 
     }
-    
+
     /**
-     * The render function called per frame. 
-     * Used to load/unload blocks from the scene as per player position.
+     * The render function called per frame. Used to load/unload blocks from the
+     * scene as per player position.
+     *
      * @param player_pos the player position
      * @see neeeds optimization
      */
@@ -109,19 +111,21 @@ public class MapLoader {
 
             for (int i = x_lower; i < x_upper; i++) {
                 for (int j = z_lower; j < z_upper; j++) {
-                    Block tempBlock = new Block();
-                    if ("0".equals(map_array.get(i)[j])) {
-                        tempBlock = modelLoader.createGrass(i, j);
-                    } else if ("1".equals(map_array.get(i)[j])) {
-                        tempBlock = modelLoader.getIntersectionType(i, j, map_array);
-                    } else if ("2".equals(map_array.get(i)[j])) {
-                        tempBlock = modelLoader.createHouse(i, j);
+                    if (!"x".equals(map_array.get(i)[j])) {
+                        Block tempBlock = new Block();
+                        if ("0".equals(map_array.get(i)[j])) {
+                            tempBlock = modelLoader.createGrass(i, j);
+                        } else if ("1".equals(map_array.get(i)[j])) {
+                            tempBlock = modelLoader.getIntersectionType(i, j, map_array);
+                        } else if ("2".equals(map_array.get(i)[j])) {
+                            tempBlock = modelLoader.createHouse(i, j);
 
-                    } else if ("b".equals(map_array.get(i)[j])) {
-                        tempBlock = modelLoader.createBillboard(i, j);
+                        } else if ("b".equals(map_array.get(i)[j])) {
+                            tempBlock = modelLoader.createBillboard(i, j);
+                        }
+                        ids_state.add(tempBlock.getId());
+                        block_state.add(tempBlock);
                     }
-                    ids_state.add(tempBlock.getId());
-                    block_state.add(tempBlock);
                 }
             }
         } else {
@@ -137,38 +141,45 @@ public class MapLoader {
 
                 for (int i = x_lower; i < x_upper; i++) {
                     for (int j = z_lower; j < z_upper; j++) {
-                        String id = Integer.toString(i) +"-" + Integer.toString(j);
-                        new_ids.add(id);
+                        if (!"x".equals(map_array.get(i)[j])) {
+                            String id = Integer.toString(i) + "-" + Integer.toString(j);
+                            new_ids.add(id);
+                        }
                     }
                 }
 
                 for (int c = 0; c < block_state.size(); c++) {
                     Block temp = block_state.get(c);
-                    if(!new_ids.contains(temp.getId())){
+                    if (!new_ids.contains(temp.getId())) {
                         temp.detach();
                     }
                 }
 
                 for (int counter = 0; counter < new_ids.size(); counter++) {
-                    String element = new_ids.get(counter);
-                    if (ids_state.contains(element)) {
+                    String id_of_block = new_ids.get(counter);
+                    if (ids_state.contains(id_of_block)) {
 
                     } else {
-                        Block tempBlock = new Block();
-                        int i = Integer.parseInt(element.split("-")[0]);
-                        int j = Integer.parseInt(element.split("-")[1]);
-                        if ("0".equals(map_array.get(i)[j])) {
-                            tempBlock = modelLoader.createGrass(i, j);
-                        } else if ("1".equals(map_array.get(i)[j])) {
-                            tempBlock = modelLoader.getIntersectionType(i, j, map_array);
-                        } else if ("2".equals(map_array.get(i)[j])) {
-                            tempBlock = modelLoader.createHouse(i, j);
+                        int i = Integer.parseInt(id_of_block.split("-")[0]);
+                        int j = Integer.parseInt(id_of_block.split("-")[1]);
+                        if (!"x".equals(equals(map_array.get(i)[j]))) {
+                            Block tempBlock = new Block();
 
-                        } else if ("b".equals(map_array.get(i)[j])) {
-                            tempBlock = modelLoader.createBillboard(i, j);
+                            if ("0".equals(map_array.get(i)[j])) {
+                                tempBlock = modelLoader.createGrass(i, j);
+                            } else if ("1".equals(map_array.get(i)[j])) {
+                                tempBlock = modelLoader.getIntersectionType(i, j, map_array);
+                            } else if ("2".equals(map_array.get(i)[j])) {
+                                tempBlock = modelLoader.createHouse(i, j);
+
+                            } else if ("b".equals(map_array.get(i)[j])) {
+                                tempBlock = modelLoader.createBillboard(i, j);
+                            } else if ("3".equals(map_array.get(i)[j])) {
+                                tempBlock = modelLoader.create2xBlock(i, j);
+                            }
+                            ids_state.add(tempBlock.getId());
+                            block_state.add(tempBlock);
                         }
-                        ids_state.add(tempBlock.getId());
-                        block_state.add(tempBlock);
                     }
                 }
             }

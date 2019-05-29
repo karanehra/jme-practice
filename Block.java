@@ -19,13 +19,16 @@ import com.jme3.scene.Spatial;
  */
 public class Block {
 
-    private Float SCALE_FACTOR;
+    Float SCALE_FACTOR;
     private Spatial block_spatial;
     private Vector3f block_location = new Vector3f();
     public String block_id;
     public Node rootNode;
-    RigidBodyControl control = new RigidBodyControl(0);
-    private BulletAppState bulletAppState;
+    
+    BulletAppState bulletAppState;
+    
+    Node block_node = new Node("block-node");
+    
 
     public Block() {
     }
@@ -33,20 +36,25 @@ public class Block {
     public Block(Spatial sp, GameManager gm, Vector3f pos) {
         block_spatial = sp;
         block_location = pos;
+        
         SCALE_FACTOR = gm.getSCALE_FACTOR();
-        translateBlock();
         bulletAppState = gm.getBulletAppState();
         rootNode = gm.getRootNode();
+        
+        translateBlock();
+        
         block_id = Float.toString(pos.x) + "-" + Float.toString(pos.z);
+        
         block_spatial.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
         block_spatial.scale(SCALE_FACTOR);
+        RigidBodyControl control = new RigidBodyControl(0);
         block_spatial.addControl(control);
         control.getCollisionShape().setMargin(0.4f*SCALE_FACTOR);
-//        control.setCcdMotionThreshold(1e-9f);
         control.setRestitution(0.1f);
         control.setFriction(0.4f);
+        block_node.attachChild(block_spatial);
         bulletAppState.getPhysicsSpace().add(block_spatial);
-        rootNode.attachChild(block_spatial);
+        rootNode.attachChild(block_node);
     }   
     
     /** 
@@ -58,26 +66,21 @@ public class Block {
                 block_location.y * SCALE_FACTOR - 7,
                 block_location.z * SCALE_FACTOR
         );
+        
     }
     
-    public Spatial getSpatial() {
-        return block_spatial;
-    }
-
+    
+    
     public void rotateAlongVertical(Float angle) {
-        block_spatial.rotate(0f, angle, 0f);
+        block_node.rotate(0f, angle, 0f);
     }
 
     public String getId() {
         return block_id;
     }
 
-    public RigidBodyControl getRBC() {
-        return control;
-    }
-
     public void detach() {
         bulletAppState.getPhysicsSpace().remove(block_spatial);
-        rootNode.detachChild(block_spatial);
+        rootNode.detachChild(block_node);
     }
 }

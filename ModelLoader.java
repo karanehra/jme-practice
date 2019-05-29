@@ -138,4 +138,14 @@ public class ModelLoader {
         
         return tempBlock;
     }
+
+    public Block create2xBlock(int i, int j) {
+        Spatial x1 = grass.clone();
+        Spatial x2 = billboard.clone();
+        Spatial x3 = billboard.clone();
+        Spatial x4 = house.clone();
+        
+       Block blk = new TwoBlock(x1,x2,x3,x4, gameManager, new Vector3f(i, 0, j));
+       return blk;
+    }
 }
