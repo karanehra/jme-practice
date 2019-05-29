@@ -47,11 +47,17 @@ public class Main extends SimpleApplication implements AnalogListener, ActionLis
         stateManager.attach(bulletAppState);
 
         bulletAppState.getPhysicsSpace().setGravity(new Vector3f(0, -9.8f, 0));
-//        bulletAppState.setDebugEnabled(true);
+        
+        
+        GameManager gameManager = new GameManager();
+        gameManager.setAssetManager(assetManager);
+        gameManager.setBulletAppState(bulletAppState);
+        gameManager.setRootNode(rootNode);
+        gameManager.setViewPort(viewPort);
+        gameManager.setSCALE_FACTOR(5f);
 
-        mapLoader = new MapLoader(rootNode, assetManager, viewPort, bulletAppState);
-
-        player = new SimplePlayer(assetManager, rootNode, bulletAppState);
+        mapLoader = new MapLoader(gameManager);
+        player = new SimplePlayer(gameManager);
 
         player_position = player.getGeo().getLocalTranslation();
 

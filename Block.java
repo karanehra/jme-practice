@@ -19,7 +19,7 @@ import com.jme3.scene.Spatial;
  */
 public class Block {
 
-    private final Float SCALE_FACTOR = 5f;
+    private Float SCALE_FACTOR;
     private Spatial block_spatial;
     private Vector3f block_location = new Vector3f();
     public String block_id;
@@ -30,12 +30,13 @@ public class Block {
     public Block() {
     }
 
-    public Block(Spatial sp, BulletAppState bas, Node rn, Vector3f pos) {
+    public Block(Spatial sp, GameManager gm, Vector3f pos) {
         block_spatial = sp;
         block_location = pos;
+        SCALE_FACTOR = gm.getSCALE_FACTOR();
         translateBlock();
-        bulletAppState = bas;
-        rootNode = rn;
+        bulletAppState = gm.getBulletAppState();
+        rootNode = gm.getRootNode();
         block_id = Float.toString(pos.x) + "-" + Float.toString(pos.z);
         block_spatial.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
         block_spatial.scale(SCALE_FACTOR);
@@ -45,7 +46,7 @@ public class Block {
         control.setRestitution(0.1f);
         control.setFriction(0.4f);
         bulletAppState.getPhysicsSpace().add(block_spatial);
-        rn.attachChild(block_spatial);
+        rootNode.attachChild(block_spatial);
     }   
     
     /** 

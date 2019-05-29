@@ -30,11 +30,13 @@ public class ModelLoader {
     private Spatial billboard;
     private final BulletAppState bulletAppState;
     private final Node rootNode;
+    private final GameManager gameManager;
     
-    public ModelLoader(AssetManager am, BulletAppState bs, Node rn){
-        assetManager = am;
-        bulletAppState = bs;
-        rootNode = rn;
+    public ModelLoader(GameManager gm){
+        assetManager = gm.getAssetManager();
+        bulletAppState = gm.getBulletAppState();
+        rootNode = gm.getRootNode();
+        gameManager= gm;
     }
     
     /**
@@ -53,7 +55,7 @@ public class ModelLoader {
     
     public Block createHouse(int i, int j) {
         Spatial x = house.clone();
-        Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0.5f, j));
+        Block blc = new Block(x,gameManager, new Vector3f(i, 0.5f, j));
         return blc;
     }
 
@@ -62,40 +64,40 @@ public class ModelLoader {
         if (rotate) {
             x.rotate(0, FastMath.HALF_PI, 0);
         }
-        Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0, j));
+        Block blc = new Block(x, gameManager, new Vector3f(i, 0, j));
         return blc;
     }
 
     public Block createTurn1xRoad(int i, int j, int rotate_count) {
         Spatial x = turn.clone();
         x.rotate(0, rotate_count * FastMath.HALF_PI, 0);
-        Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0, j));
+        Block blc = new Block(x, gameManager, new Vector3f(i, 0, j));
         return blc;
     }
 
     public Block createGrass(int i, int j) {
         Spatial x = grass.clone();
-        Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0.05f, j));
+        Block blc = new Block(x, gameManager, new Vector3f(i, 0.05f, j));
         return blc;
 
     }
 
     public Block createIntersection(int i, int j) {
         Spatial x = intersection.clone();
-        Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0, j));
+        Block blc = new Block(x, gameManager, new Vector3f(i, 0, j));
         return blc;
     }
 
     public Block createTrisection1xRoad(int i, int j, int rotation_count) {
         Spatial x = trisection.clone();
         x.rotate(0, FastMath.HALF_PI * rotation_count, 0);
-        Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0, j));
+        Block blc = new Block(x, gameManager, new Vector3f(i, 0, j));
         return blc;
     }
 
     public Block createBillboard(int i, int j) {
         Spatial x = billboard.clone();
-        Block blc = new Block(x, bulletAppState, rootNode, new Vector3f(i, 0, j));
+        Block blc = new Block(x, gameManager, new Vector3f(i, 0, j));
         return blc;
     }
 

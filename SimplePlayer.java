@@ -37,10 +37,10 @@ public class SimplePlayer {
     private Material mat2;
     private Node vehicleNode;
 
-    public SimplePlayer(AssetManager am, Node rn, BulletAppState ba) {
-        assetManager = am;
-        rootNode = rn;
-        bulletAppState = ba;
+    public SimplePlayer(GameManager gm) {
+        assetManager = gm.getAssetManager();
+        rootNode = gm.getRootNode();
+        bulletAppState = gm.getBulletAppState();
         initPlayer();
     }
 

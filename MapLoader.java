@@ -54,18 +54,14 @@ public class MapLoader {
      * Used to initialize the mapLoader. The params needed to prevent an
      * unnecessary extension from the SimpleGame class
      *
-     * @param rn the root node
-     * @param am the asset manager
-     * @param vp the viewport
-     * @param ba the bulletApp
-     *
-     *
+     * @param gm The GameManager object
      */
-    public MapLoader(Node rn, AssetManager am, ViewPort vp, BulletAppState ba) {
-        rootNode = rn;
-        assetManager = am;
-        viewPort = vp;
-        bulletAppState = ba;
+    public MapLoader(GameManager gm) {
+        rootNode = gm.getRootNode();
+        assetManager = gm.getAssetManager();
+        viewPort = gm.getViewPort();
+        bulletAppState = gm.getBulletAppState();
+        modelLoader = new ModelLoader(gm);
     }
 
     /**
@@ -75,7 +71,7 @@ public class MapLoader {
     public void initMap(Vector3f player_pos) {
 
         player_pos_tracker = player_pos;
-        modelLoader = new ModelLoader(assetManager, bulletAppState, rootNode);
+        
         modelLoader.loadAssets();
 
         try (BufferedReader fileReader = new BufferedReader(new FileReader(directory))) {
