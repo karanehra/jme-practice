@@ -118,6 +118,26 @@ public class GameManager {
     public void setSCALE_FACTOR(float SCALE_FACTOR) {
         this.SCALE_FACTOR = SCALE_FACTOR;
     }
+    
+        private ModelLoader modelLoader;
+
+    /**
+     * Get the value of modelLoader
+     *
+     * @return the value of modelLoader
+     */
+    public ModelLoader getModelLoader() {
+        return modelLoader;
+    }
+
+    /**
+     * Set the value of modelLoader
+     *
+     * @param modelLoader new value of modelLoader
+     */
+    public void setModelLoader(ModelLoader modelLoader) {
+        this.modelLoader = modelLoader;
+    }
 
 
 

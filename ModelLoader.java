@@ -53,6 +53,10 @@ public class ModelLoader {
         billboard = assetManager.loadModel("Models/billboard/billboard.j3o");
     }
     
+    public Spatial getHouse(){
+        return house.clone();
+    }
+    
     public Block createHouse(int i, int j) {
         Spatial x = house.clone();
         Block blc = new Block(x,gameManager, new Vector3f(i, 0.5f, j));
@@ -137,5 +141,15 @@ public class ModelLoader {
         }
         
         return tempBlock;
+    }
+
+    public Block create2xBlock(int i, int j) {
+        Spatial x1 = grass.clone();
+        Spatial x2 = billboard.clone();
+        Spatial x3 = billboard.clone();
+        Spatial x4 = house.clone();
+        
+       Block blk = new TwoBlock(x1,x2,x3,x4, gameManager, new Vector3f(i, 0, j));
+       return blk;
     }
 }
