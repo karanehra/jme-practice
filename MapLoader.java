@@ -25,6 +25,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import mygame.models.House;
 
 /**
  *
@@ -48,6 +49,7 @@ public class MapLoader {
 
     private Vector3f player_pos_tracker = new Vector3f();
     private ModelLoader modelLoader;
+    private final GameManager gameManager;
 
     /**
      * Used to initialize the mapLoader. The params needed to prevent an
@@ -62,10 +64,12 @@ public class MapLoader {
         bulletAppState = gm.getBulletAppState();
         modelLoader = new ModelLoader(gm);
         gm.setModelLoader(modelLoader);
+        
+        gameManager = gm;
     }
 
     /**
-     * Initializes the player position and the model loades.
+     * Initializes the player position and the model loads.
      *
      * @param player_pos the player position
      */
@@ -118,7 +122,7 @@ public class MapLoader {
                         } else if ("1".equals(map_array.get(i)[j])) {
                             tempBlock = modelLoader.getIntersectionType(i, j, map_array);
                         } else if ("2".equals(map_array.get(i)[j])) {
-                            tempBlock = modelLoader.createHouse(i, j);
+                            tempBlock = new House(gameManager,new Vector3f(i,0,j));
 
                         } else if ("b".equals(map_array.get(i)[j])) {
                             tempBlock = modelLoader.createBillboard(i, j);

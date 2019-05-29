@@ -53,6 +53,10 @@ public class ModelLoader {
         billboard = assetManager.loadModel("Models/billboard/billboard.j3o");
     }
     
+    public Spatial getHouse(){
+        return house.clone();
+    }
+    
     public Block createHouse(int i, int j) {
         Spatial x = house.clone();
         Block blc = new Block(x,gameManager, new Vector3f(i, 0.5f, j));
