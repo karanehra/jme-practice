@@ -7,34 +7,24 @@ package mygame;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.bullet.collision.shapes.BoxCollisionShape;
-import com.jme3.bullet.collision.shapes.CollisionShape;
-import com.jme3.bullet.control.RigidBodyControl;
-import com.jme3.bullet.util.CollisionShapeFactory;
-import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
-import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.renderer.ViewPort;
-import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.shape.Box;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.DirectionalLightShadowRenderer;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -42,56 +32,47 @@ import java.util.regex.Pattern;
  */
 public class MapLoader {
 
-    private String directory = System.getProperty("user.home") + File.separator + "sample.txt";
+    private final String directory = System.getProperty("user.home") + File.separator + "sample.txt";
 
     private static Node rootNode;
     private static AssetManager assetManager;
     private static ViewPort viewPort;
-    private int map_size = 64;
-    private float SCALE_FACTOR = 5f;
+    private final int map_size = 64;
+    private final float SCALE_FACTOR = 5f;
 
-    public Geometry player;
 
     private ArrayList<String[]> map_array = new ArrayList<String[]>();
-    private ArrayList<Integer[]> render_state = new ArrayList<Integer[]>();
+    private ArrayList<Block> block_state = new ArrayList<Block>();
+    private ArrayList<String> ids_state = new ArrayList<String>();
 
-    private Spatial house;
-    private Spatial road;
-    private Spatial ground;
-    private Spatial turn;
-    private Spatial grass;
-    private Spatial intersection;
-    private Spatial trisection;
-    private Spatial billboard;
     private static BulletAppState bulletAppState;
 
     private Vector3f player_pos_tracker = new Vector3f();
+    private ModelLoader modelLoader;
 
     /**
+     * Used to initialize the mapLoader. The params needed to prevent an
+     * unnecessary extension from the SimpleGame class
      *
-     * @param rn
-     * @param am
+     * @param gm The GameManager object
      */
-    public MapLoader(Node rn, AssetManager am, ViewPort vp, BulletAppState ba) {
-        rootNode = rn;
-        assetManager = am;
-        viewPort = vp;
-        bulletAppState = ba;
-        loadAssets();
-
+    public MapLoader(GameManager gm) {
+        rootNode = gm.getRootNode();
+        assetManager = gm.getAssetManager();
+        viewPort = gm.getViewPort();
+        bulletAppState = gm.getBulletAppState();
+        modelLoader = new ModelLoader(gm);
     }
 
-    private void loadAssets() {
-        house = assetManager.loadModel("Models/h2/h2.j3o");
-        grass = assetManager.loadModel("Models/ground/ground.j3o");
-        road = assetManager.loadModel("Models/road-st-1x/road-st-1x.j3o");
-        turn = assetManager.loadModel("Models/road-turn-1x/road-turn-1x.j3o");
-        intersection = assetManager.loadModel("Models/intersection/imtersection.j3o");
-        trisection = assetManager.loadModel("Models/trisection-1x/trisection-1x.j3o");
-        billboard = assetManager.loadModel("Models/billboard/billboard.j3o");
-    }
+    /**
+     * Initializes the player position and the model loades.
+     * @param player_pos the player position
+     */
+    public void initMap(Vector3f player_pos) {
 
-    public void initMap() {
+        player_pos_tracker = player_pos;
+        
+        modelLoader.loadAssets();
 
         try (BufferedReader fileReader = new BufferedReader(new FileReader(directory))) {
             String line = fileReader.readLine();
@@ -99,7 +80,6 @@ public class MapLoader {
                 map_array.add(line.split(""));
                 Integer[] temp = new Integer[64];
                 Arrays.fill(temp, 0);
-                render_state.add(temp);
                 line = fileReader.readLine();
             }
         } catch (FileNotFoundException e) {
@@ -107,54 +87,101 @@ public class MapLoader {
         } catch (IOException e) {
             // exception handling
         }
+
         createLightsAndShadows();
 
     }
-
+    
+    /**
+     * The render function called per frame. 
+     * Used to load/unload blocks from the scene as per player position.
+     * @param player_pos the player position
+     * @see neeeds optimization
+     */
     public void renderMap(Vector3f player_pos) {
-        if (!player_pos_tracker.equals(player_pos)) {
+        if (ids_state.isEmpty()) {
             player_pos_tracker = player_pos;
-            int x_lower =  Integer.max((int) player_pos.x-3, 0);
-            int x_upper = Integer.min((int) player_pos.x+3, 8);
-            
-            int y_lower = Integer.max((int) player_pos.z-3, 0);
-            int y_upper = Integer.min((int) player_pos.z+3, 64);
-            
+            int x_lower = Integer.max((int) player_pos.x - 3, 0);
+            int x_upper = Integer.min((int) player_pos.x + 3, 64);
+
+            int z_lower = Integer.max((int) player_pos.z - 3, 0);
+            int z_upper = Integer.min((int) player_pos.z + 3, 64);
+
             for (int i = x_lower; i < x_upper; i++) {
-                for (int j = y_lower; j < y_upper; j++) {
+                for (int j = z_lower; j < z_upper; j++) {
+                    Block tempBlock = new Block();
                     if ("0".equals(map_array.get(i)[j])) {
-                        if(render_state.get(i)[j] == 0){
-                            createGrass(i, j);
-                            render_state.get(i)[j] = 1;
-                        }
+                        tempBlock = modelLoader.createGrass(i, j);
                     } else if ("1".equals(map_array.get(i)[j])) {
-                        if(render_state.get(i)[j] == 0){
-                            getIntersectionType(i, j, map_array);
-                            render_state.get(i)[j] = 1;
-                        }
+                        tempBlock = modelLoader.getIntersectionType(i, j, map_array);
                     } else if ("2".equals(map_array.get(i)[j])) {
-                        if(render_state.get(i)[j] == 0){
-                            createHouse(i, j);
-                            render_state.get(i)[j] = 1;
-                        }
-                        
+                        tempBlock = modelLoader.createHouse(i, j);
+
                     } else if ("b".equals(map_array.get(i)[j])) {
-                        if(render_state.get(i)[j] == 0){
-                            createBillboard(i, j);
-                            render_state.get(i)[j] = 1;
+                        tempBlock = modelLoader.createBillboard(i, j);
+                    }
+                    ids_state.add(tempBlock.getId());
+                    block_state.add(tempBlock);
+                }
+            }
+        } else {
+            if (!player_pos_tracker.equals(player_pos)) {
+                player_pos_tracker = player_pos;
+                int x_lower = Integer.max((int) player_pos.x - 3, 0);
+                int x_upper = Integer.min((int) player_pos.x + 3, 64);
+
+                int z_lower = Integer.max((int) player_pos.z - 3, 0);
+                int z_upper = Integer.min((int) player_pos.z + 3, 64);
+
+                ArrayList<String> new_ids = new ArrayList<>();
+
+                for (int i = x_lower; i < x_upper; i++) {
+                    for (int j = z_lower; j < z_upper; j++) {
+                        String id = Integer.toString(i) +"-" + Integer.toString(j);
+                        new_ids.add(id);
+                    }
+                }
+
+                for (int c = 0; c < block_state.size(); c++) {
+                    Block temp = block_state.get(c);
+                    if(!new_ids.contains(temp.getId())){
+                        temp.detach();
+                    }
+                }
+
+                for (int counter = 0; counter < new_ids.size(); counter++) {
+                    String element = new_ids.get(counter);
+                    if (ids_state.contains(element)) {
+
+                    } else {
+                        Block tempBlock = new Block();
+                        int i = Integer.parseInt(element.split("-")[0]);
+                        int j = Integer.parseInt(element.split("-")[1]);
+                        if ("0".equals(map_array.get(i)[j])) {
+                            tempBlock = modelLoader.createGrass(i, j);
+                        } else if ("1".equals(map_array.get(i)[j])) {
+                            tempBlock = modelLoader.getIntersectionType(i, j, map_array);
+                        } else if ("2".equals(map_array.get(i)[j])) {
+                            tempBlock = modelLoader.createHouse(i, j);
+
+                        } else if ("b".equals(map_array.get(i)[j])) {
+                            tempBlock = modelLoader.createBillboard(i, j);
                         }
-                        
+                        ids_state.add(tempBlock.getId());
+                        block_state.add(tempBlock);
                     }
                 }
             }
         }
-
     }
 
+    /**
+     * Lights up the scene.
+     */
     private void createLightsAndShadows() {
 
         DirectionalLight sun = new DirectionalLight();
-        sun.setColor(ColorRGBA.White);
+        sun.setColor(ColorRGBA.White.mult(2f));
         sun.setDirection(new Vector3f(10, -10, -10).normalizeLocal());
         rootNode.addLight(sun);
 
@@ -170,145 +197,6 @@ public class MapLoader {
         fpp.addFilter(dlsf);
         viewPort.addProcessor(fpp);
 
-    }
-
-    private void createHouse(int i, int j) {
-        Spatial x = house.clone();
-        x = setTranslation(i, (float) 0.5, j, x);
-        x.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-        x.scale(SCALE_FACTOR);
-        x.addControl(new RigidBodyControl(new BoxCollisionShape(new Vector3f((float) 0.5, (float) 0.5, (float) 0.5)), 0));
-        bulletAppState.getPhysicsSpace().add(x);
-        rootNode.attachChild(x);
-    }
-
-    private void createStraight1xRoad(int i, int j, boolean rotate) {
-        Spatial x = road.clone();
-        x = setTranslation(i, 0, j, x);
-        x.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-        x.scale(SCALE_FACTOR);
-        if (rotate) {
-            x.rotate(0, (float) (Math.PI / 2), 0);
-        }
-        RigidBodyControl control = new RigidBodyControl(0);
-        x.addControl(control);
-        control.getCollisionShape().setMargin(0.4f);
-        control.setRestitution(0.1f);
-        control.setFriction(0.4f);
-        bulletAppState.getPhysicsSpace().add(x);
-        rootNode.attachChild(x);
-    }
-
-    private void createTurn1xRoad(int i, int j, int rotate_count) {
-        Spatial x = turn.clone();
-        x = setTranslation(i, 0, j, x);
-        x.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-        x.scale(SCALE_FACTOR);
-        x.rotate(0, (float) (rotate_count * Math.PI / 2), 0);
-        RigidBodyControl control = new RigidBodyControl(0);
-        x.addControl(control);
-        control.getCollisionShape().setMargin(0.4f);
-        control.setRestitution(0.1f);
-        control.setFriction(0.4f);
-        bulletAppState.getPhysicsSpace().add(x);
-        rootNode.attachChild(x);
-    }
-
-    private void createGrass(int i, int j) {
-        Spatial x = grass.clone();
-        x = setTranslation(i, (float) (0.05), j, x);
-        x.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-        x.scale(SCALE_FACTOR);
-        RigidBodyControl control = new RigidBodyControl(0);
-        x.addControl(control);
-        control.getCollisionShape().setMargin(0.4f);
-        control.setRestitution(0.1f);
-        control.setFriction(0.4f);
-        bulletAppState.getPhysicsSpace().add(x);
-        rootNode.attachChild(x);
-
-    }
-
-    public Spatial setTranslation(float i, float j, float k, Spatial s) {
-        s.setLocalTranslation(i * SCALE_FACTOR, j * SCALE_FACTOR - 5, k * SCALE_FACTOR);
-        return s;
-    }
-
-    public void getIntersectionType(int i, int j, ArrayList<String[]> map) {
-        String neighbour_code = map.get(i - 1)[j] + map.get(i)[j + 1] + map.get(i + 1)[j] + map.get(i)[j - 1];
-
-        if (Pattern.matches("[^1]111$", neighbour_code)) {
-            createTrisection1xRoad(i, j, 1);
-        } else if (Pattern.matches("^1[^1]11$", neighbour_code)) {
-            createTrisection1xRoad(i, j, 2);
-        } else if (Pattern.matches("^11[^1]1$", neighbour_code)) {
-            createTrisection1xRoad(i, j, 3);
-        } else if (Pattern.matches("^111[^1]$", neighbour_code)) {
-            createTrisection1xRoad(i, j, 0);
-        } else if (Pattern.matches("^11[^1]*$", neighbour_code)) {
-            createTurn1xRoad(i, j, 0);
-        } else if (Pattern.matches("^[^1]11[^1]$", neighbour_code)) {
-            createTurn1xRoad(i, j, 1);
-        } else if (Pattern.matches("^[^1]*11$", neighbour_code)) {
-            createTurn1xRoad(i, j, 2);
-        } else if (Pattern.matches("^1[^1]*1$", neighbour_code)) {
-            createTurn1xRoad(i, j, 3);
-        } else if (Pattern.matches("^1[^1]1[^1]$", neighbour_code)) {
-            createStraight1xRoad(i, j, false);
-        } else if (Pattern.matches("^[^1]1[^1]1$", neighbour_code)) {
-            createStraight1xRoad(i, j, true);
-        } else if (Pattern.matches("^1[^1]*$", neighbour_code)) {
-            createStraight1xRoad(i, j, false);
-        } else if (Pattern.matches("^[^1]1[^1]*$", neighbour_code)) {
-            createStraight1xRoad(i, j, false);
-        } else if (Pattern.matches("^[^1]*1[^1]$", neighbour_code)) {
-            createStraight1xRoad(i, j, true);
-        } else if (Pattern.matches("^[^1]*1$", neighbour_code)) {
-            createStraight1xRoad(i, j, true);
-        } else {
-            createIntersection(i, j);
-        }
-    }
-
-    private void createIntersection(int i, int j) {
-        Spatial x = intersection.clone();
-        x = setTranslation(i, 0, j, x);
-        x.scale(SCALE_FACTOR);
-        RigidBodyControl control = new RigidBodyControl(0);
-        x.addControl(control);
-        control.getCollisionShape().setMargin(0.4f);
-        control.setRestitution(0.1f);
-        control.setFriction(0.4f);
-        bulletAppState.getPhysicsSpace().add(x);
-        rootNode.attachChild(x);
-    }
-
-    private void createTrisection1xRoad(int i, int j, int rotation_count) {
-        Spatial x = trisection.clone();
-        x = setTranslation(i, 0, j, x);
-        x.rotate(0, (float) ((Math.PI / 2) * rotation_count), 0);
-        x.scale(SCALE_FACTOR);
-        RigidBodyControl control = new RigidBodyControl(0);
-        x.addControl(control);
-        control.getCollisionShape().setMargin(0.4f);
-        control.setRestitution(0.1f);
-        control.setFriction(0.4f);
-        bulletAppState.getPhysicsSpace().add(x);
-        rootNode.attachChild(x);
-    }
-
-    private void createBillboard(int i, int j) {
-        Spatial x = billboard.clone();
-        x = setTranslation(i, 0, j, x);
-        x.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-        x.scale(SCALE_FACTOR);
-        RigidBodyControl control = new RigidBodyControl(0);
-        x.addControl(control);
-        control.getCollisionShape().setMargin(0.4f);
-        control.setRestitution(0.1f);
-        control.setFriction(0.4f);
-        bulletAppState.getPhysicsSpace().add(x);
-        rootNode.attachChild(x);
     }
 
 }
