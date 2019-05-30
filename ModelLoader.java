@@ -53,15 +53,19 @@ public class ModelLoader {
         billboard = assetManager.loadModel("Models/billboard/billboard.j3o");
     }
     
-    public Spatial getHouse(){
+    public Spatial getHouseSpatial(){
         return house.clone();
     }
     
-    public Block createHouse(int i, int j) {
-        Spatial x = house.clone();
-        Block blc = new Block(x,gameManager, new Vector3f(i, 0.5f, j));
-        return blc;
+    public Spatial getGrassSpatial(){
+        return grass.clone();
     }
+    
+//    public Block createHouse(int i, int j) {
+//        Spatial x = house.clone();
+//        Block blc = new Block(x,gameManager, new Vector3f(i, 0.5f, j));
+//        return blc;
+//    }
 
     public Block createStraight1xRoad(int i, int j, boolean rotate) {
         Spatial x = road.clone();
@@ -79,12 +83,12 @@ public class ModelLoader {
         return blc;
     }
 
-    public Block createGrass(int i, int j) {
-        Spatial x = grass.clone();
-        Block blc = new Block(x, gameManager, new Vector3f(i, 0.05f, j));
-        return blc;
-
-    }
+//    public Block createGrass(int i, int j) {
+//        Spatial x = grass.clone();
+//        Block blc = new Block(x, gameManager, new Vector3f(i, 0.05f, j));
+//        return blc;
+//
+//    }
 
     public Block createIntersection(int i, int j) {
         Spatial x = intersection.clone();

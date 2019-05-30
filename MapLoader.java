@@ -25,6 +25,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import mygame.models.Grass;
 import mygame.models.House;
 
 /**
@@ -118,11 +119,11 @@ public class MapLoader {
                     if (!"x".equals(map_array.get(i)[j])) {
                         Block tempBlock = new Block();
                         if ("0".equals(map_array.get(i)[j])) {
-                            tempBlock = modelLoader.createGrass(i, j);
+                            tempBlock = new Grass(gameManager,new Vector3f(i, 0, j));
                         } else if ("1".equals(map_array.get(i)[j])) {
                             tempBlock = modelLoader.getIntersectionType(i, j, map_array);
                         } else if ("2".equals(map_array.get(i)[j])) {
-                            tempBlock = new House(gameManager,new Vector3f(i,0,j));
+                            tempBlock = new House(gameManager,new Vector3f(i,0.5f,j));
 
                         } else if ("b".equals(map_array.get(i)[j])) {
                             tempBlock = modelLoader.createBillboard(i, j);
@@ -170,11 +171,11 @@ public class MapLoader {
                             Block tempBlock = new Block();
 
                             if ("0".equals(map_array.get(i)[j])) {
-                                tempBlock = modelLoader.createGrass(i, j);
+                                tempBlock = new Grass(gameManager,new Vector3f(i, 0.05f, j));
                             } else if ("1".equals(map_array.get(i)[j])) {
                                 tempBlock = modelLoader.getIntersectionType(i, j, map_array);
                             } else if ("2".equals(map_array.get(i)[j])) {
-                                tempBlock = modelLoader.createHouse(i, j);
+                                tempBlock = new House(gameManager,new Vector3f(i,0.5f,j));
 
                             } else if ("b".equals(map_array.get(i)[j])) {
                                 tempBlock = modelLoader.createBillboard(i, j);

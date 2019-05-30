@@ -5,7 +5,6 @@
  */
 package mygame.models;
 
-import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
 import mygame.Block;
 import mygame.GameManager;
@@ -15,13 +14,12 @@ import mygame.ModelLoader;
  *
  * @author karanehra
  */
-public class House extends Block{
-
+public class Grass extends Block{
     private final ModelLoader modelLoader;
     
-    public House(GameManager gm, Vector3f pos){
+    public Grass(GameManager gm, Vector3f pos){
         modelLoader = gm.getModelLoader();
-        block_spatial = modelLoader.getHouseSpatial();
+        block_spatial = modelLoader.getGrassSpatial();
         block_location = pos;
         
         setupClassFields(gm);

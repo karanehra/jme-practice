@@ -36,14 +36,18 @@ public class Block {
         block_spatial = sp;
         block_location = pos;
 
-        SCALE_FACTOR = gm.getSCALE_FACTOR();
-        bulletAppState = gm.getBulletAppState();
-        rootNode = gm.getRootNode();
-
+        
+        setupClassFields(gm);
         translateBlock();
         setupBlock();
         assignBlockID();
 
+    }
+    
+    public final void setupClassFields(GameManager gm){
+        SCALE_FACTOR = gm.getSCALE_FACTOR();
+        bulletAppState = gm.getBulletAppState();
+        rootNode = gm.getRootNode();
     }
 
     /**
