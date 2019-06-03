@@ -13,6 +13,9 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
+import mygame.models.StraightRoad;
+import mygame.models.TrisectionRoad;
+import mygame.models.TurnRoad;
 
 /**
  *
@@ -31,17 +34,17 @@ public class ModelLoader {
     private final BulletAppState bulletAppState;
     private final Node rootNode;
     private final GameManager gameManager;
-    
-    public ModelLoader(GameManager gm){
+
+    public ModelLoader(GameManager gm) {
         assetManager = gm.getAssetManager();
         bulletAppState = gm.getBulletAppState();
         rootNode = gm.getRootNode();
-        gameManager= gm;
+        gameManager = gm;
     }
-    
+
     /**
-     * Used to load all assets ONCE on game start.
-     *  These assets are the cloned whenever needed by the block creators.
+     * Used to load all assets ONCE on game start. These assets are the cloned
+     * whenever needed by the block creators.
      */
     public void loadAssets() {
         house = assetManager.loadModel("Models/h2/h2.j3o");
@@ -52,21 +55,28 @@ public class ModelLoader {
         trisection = assetManager.loadModel("Models/trisection-1x/trisection-1x.j3o");
         billboard = assetManager.loadModel("Models/billboard/billboard.j3o");
     }
-    
-    public Spatial getHouseSpatial(){
+
+    public Spatial getHouseSpatial() {
         return house.clone();
     }
-    
-    public Spatial getGrassSpatial(){
+
+    public Spatial getGrassSpatial() {
         return grass.clone();
     }
+
+    public Spatial getStraightRoadSpatial() {
+        return road.clone();
+    }
     
+    public Spatial getTurnRoadSpatial() {
+        return turn.clone();
+    }
+
 //    public Block createHouse(int i, int j) {
 //        Spatial x = house.clone();
 //        Block blc = new Block(x,gameManager, new Vector3f(i, 0.5f, j));
 //        return blc;
 //    }
-
     public Block createStraight1xRoad(int i, int j, boolean rotate) {
         Spatial x = road.clone();
         if (rotate) {
@@ -89,7 +99,6 @@ public class ModelLoader {
 //        return blc;
 //
 //    }
-
     public Block createIntersection(int i, int j) {
         Spatial x = intersection.clone();
         Block blc = new Block(x, gameManager, new Vector3f(i, 0, j));
@@ -113,37 +122,36 @@ public class ModelLoader {
         String neighbour_code = map.get(i - 1)[j] + map.get(i)[j + 1] + map.get(i + 1)[j] + map.get(i)[j - 1];
         Block tempBlock;
         if (Pattern.matches("[^1]111$", neighbour_code)) {
-            tempBlock = createTrisection1xRoad(i, j, 1);
+            tempBlock = new TrisectionRoad(gameManager, new Vector3f(i, 0, j),FastMath.HALF_PI);
         } else if (Pattern.matches("^1[^1]11$", neighbour_code)) {
-            tempBlock = createTrisection1xRoad(i, j, 2);
+            tempBlock = new TrisectionRoad(gameManager, new Vector3f(i, 0, j),FastMath.PI);
         } else if (Pattern.matches("^11[^1]1$", neighbour_code)) {
-            tempBlock = createTrisection1xRoad(i, j, 3);
+            tempBlock = new TrisectionRoad(gameManager, new Vector3f(i, 0, j),FastMath.HALF_PI);
         } else if (Pattern.matches("^111[^1]$", neighbour_code)) {
-            tempBlock = createTrisection1xRoad(i, j, 0);
+            tempBlock = new TrisectionRoad(gameManager, new Vector3f(i, 0, j),0f);
         } else if (Pattern.matches("^11[^1]*$", neighbour_code)) {
-            tempBlock = createTurn1xRoad(i, j, 0);
+            tempBlock = new TurnRoad(gameManager, new Vector3f(i, 0, j), 0f);
         } else if (Pattern.matches("^[^1]11[^1]$", neighbour_code)) {
-            tempBlock = createTurn1xRoad(i, j, 1);
+            tempBlock = new TurnRoad(gameManager, new Vector3f(i, 0, j), FastMath.HALF_PI);
         } else if (Pattern.matches("^[^1]*11$", neighbour_code)) {
-            tempBlock = createTurn1xRoad(i, j, 2);
+            tempBlock = new TurnRoad(gameManager, new Vector3f(i, 0, j), FastMath.PI);
         } else if (Pattern.matches("^1[^1]*1$", neighbour_code)) {
-            tempBlock = createTurn1xRoad(i, j, 3);
+            tempBlock = new TurnRoad(gameManager, new Vector3f(i, 0, j), FastMath.HALF_PI*3);
         } else if (Pattern.matches("^1[^1]1[^1]$", neighbour_code)) {
-            tempBlock = createStraight1xRoad(i, j, false);
+            tempBlock = new StraightRoad(gameManager, new Vector3f(i, 0, j));
         } else if (Pattern.matches("^[^1]1[^1]1$", neighbour_code)) {
-            tempBlock = createStraight1xRoad(i, j, true);
+            tempBlock = new StraightRoad(gameManager, new Vector3f(i, 0, j), FastMath.HALF_PI);
         } else if (Pattern.matches("^1[^1]*$", neighbour_code)) {
-            tempBlock = createStraight1xRoad(i, j, false);
+            tempBlock = new StraightRoad(gameManager, new Vector3f(i, 0, j));
         } else if (Pattern.matches("^[^1]1[^1]*$", neighbour_code)) {
-            tempBlock = createStraight1xRoad(i, j, false);
+            tempBlock = new StraightRoad(gameManager, new Vector3f(i, 0, j));
         } else if (Pattern.matches("^[^1]*1[^1]$", neighbour_code)) {
-            tempBlock = createStraight1xRoad(i, j, true);
+            tempBlock = new StraightRoad(gameManager, new Vector3f(i, 0, j), FastMath.HALF_PI);
         } else if (Pattern.matches("^[^1]*1$", neighbour_code)) {
-            tempBlock = createStraight1xRoad(i, j, true);
+            tempBlock = new StraightRoad(gameManager, new Vector3f(i, 0, j), FastMath.HALF_PI);
         } else {
             tempBlock = createIntersection(i, j);
         }
-        
         return tempBlock;
     }
 
@@ -152,8 +160,8 @@ public class ModelLoader {
         Spatial x2 = billboard.clone();
         Spatial x3 = billboard.clone();
         Spatial x4 = house.clone();
-        
-       Block blk = new TwoBlock(x1,x2,x3,x4, gameManager, new Vector3f(i, 0, j));
-       return blk;
+
+        Block blk = new TwoBlock(x1, x2, x3, x4, gameManager, new Vector3f(i, 0, j));
+        return blk;
     }
 }

@@ -44,6 +44,7 @@ public class Block {
 
     }
     
+    
     public final void setupClassFields(GameManager gm){
         SCALE_FACTOR = gm.getSCALE_FACTOR();
         bulletAppState = gm.getBulletAppState();
@@ -76,11 +77,18 @@ public class Block {
     }
 
     public void rotateAlongVertical(Float angle) {
-        block_node.rotate(0f, angle, 0f);
+        detach();
+        block_spatial.rotate(0f, angle, 0f);
+        attach();
     }
 
     public String getId() {
         return block_id;
+    }
+    
+    public void attach(){
+        bulletAppState.getPhysicsSpace().add(block_spatial);
+        rootNode.attachChild(block_node);
     }
 
     public void detach() {
